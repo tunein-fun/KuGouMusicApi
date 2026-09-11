@@ -1,0 +1,40 @@
+#  构建 Docker 镜像并推送到阿里云容器镜像服务（ACR）
+## 手动触发，tag 由调用方指定（如 v1.5.1）
+name: Build & Push to Aliyun
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '镜像 tag，例如 v1.5.1'
+        required: true
+        type: string
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - uses: actions/checkout@v4
+
+      # 先登录再构建：凭证有问题时快速失败，不用等构建跑完
+    - name: Alibaba Cloud Container Registry (ACR) Login
+      uses: aliyun/acr-login@v1
+      with:
+        # Container registry username
+        username: ${{ vars.ALIYUN_ACR_USERNAME }}
+        # Container registry password
+        password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
+        # Region ID
+        region-id: ${{ vars.ALIYUN_ACR_REGION }}
+        # Container registry server url
+        login-server: ${{ vars.ALIYUN_ACR_REGISTRY }}
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ${{ vars.ALIYUN_ACR_IMAGE_NAME }}:${{ inputs.tag }}
+
+    - name: Push
+      run: docker push ${{ vars.ALIYUN_ACR_IMAGE_NAME }}:${{ inputs.tag }}
