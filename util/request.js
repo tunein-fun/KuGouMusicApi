@@ -55,7 +55,9 @@ const createRequest = (options) => {
     };
 
     if (token) defaultParams['token'] = token;
-    if (userid && userid !== 0) defaultParams['userid'] = userid;
+    // userid 必须始终下发（未登录时为 0）：搜索类接口（v3/search/song、v3/search/mixed、
+    // v6/search/complex）缺少该参数会直接返回 error_code 152 Parameter Error
+    defaultParams['userid'] = userid;
     const params = options?.clearDefaultParams ? options?.params || {} : Object.assign({}, defaultParams, options?.params || {});
 
     headers['clienttime'] = params.clienttime;
