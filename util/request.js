@@ -121,7 +121,9 @@ const createRequest = (options) => {
 
     // 如果有登录令牌和用户 ID，也加入默认参数
     if (token) defaultParams['token'] = token;
-    if (userid && userid !== 0) defaultParams['userid'] = userid;
+    // userid 必须始终下发（未登录时为 0）：搜索类接口（v3/search/song、v3/search/mixed、
+    // v6/search/complex）缺少该参数会直接返回 error_code 152 Parameter Error
+    defaultParams['userid'] = userid;
 
     // 合并默认参数和自定义参数（clearDefaultParams 为 true 时仅使用自定义参数）
     const params = options?.clearDefaultParams ? options?.params || {} : Object.assign({}, defaultParams, options?.params || {});
