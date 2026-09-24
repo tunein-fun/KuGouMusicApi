@@ -2,7 +2,9 @@ FROM node:lts-alpine
 
 RUN apk add --no-cache tini
 
-RUN corepack enable
+# 固定 pnpm 版本：corepack 默认会拉最新版（pnpm 12+），
+# 它把 esbuild 的 ignored build script 当作错误，导致 pnpm install 直接失败
+RUN npm install -g pnpm@10.33.0
 
 ENV NODE_ENV=production
 
